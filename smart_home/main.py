@@ -36,28 +36,33 @@ if __name__ == "__main__":
         elif room[0] == bedroom.get_room_name():
             bedroom.add_device(create_device_from_file(room[1], room[2], room[3]))
     parlor.add_device(Light("Light", "Лампа4", "power=100,state=off"))
+    print("Rooms output:")
+    print(parlor)
+    print(kitchen)
+    print(bedroom)
+
+    """Changing parameters of different devices:
+        In the living room sensor: 25 -> 45
+        In the kitchen light: 40 -> 45, on -> off
+        In the bedroom thermostat: 20 -> 45, 22 -> 54"""
+    parlor[2].change_params(value=45)
+    kitchen[0].change_params(power=45, state="off")
+    bedroom[0].change_params(temperature=45, target=54)
+    print("\nChanging parameters of different devices:")
     print(parlor)
     print(kitchen)
     print(bedroom)
 
     """Output total power consumption"""
+    print("\nOutput total power consumption:")
     print(parlor.get_total_power())
     print(kitchen.get_total_power())
     print(bedroom.get_total_power())
 
-    """Changing parameters of different devices:
-    In the living room sensor: 25 -> 45
-    In the kitchen light: 40 -> 45, on -> off
-    In the bedroom thermostat: 20 -> 45, 22 -> 54"""
-    parlor[2].change_params(value=45)
-    kitchen[0].change_params(power=45, state="off")
-    bedroom[0].change_params(temperature=45, target=54)
-    print(parlor)
-    print(kitchen)
-    print(bedroom)
-
     """Testing magic methods
     String and debug representations:"""
+    print("\nTesting magic methods")
+    print("String and debug representations:")
     print(parlor)
     print(kitchen)
     print(bedroom)
@@ -66,37 +71,48 @@ if __name__ == "__main__":
     print(repr(bedroom))
 
     """Device comparison:"""
+    print("\nDevice comparison:")
     print(parlor[2] == kitchen[1])
     bedroom[0].change_params(temperature=22, target=24)
     print(bedroom[0] == parlor[1])
 
     """Adding a room with elements:"""
+    print("\nAdding a room with elements:")
     new_parlor = parlor + kitchen[0]
     print(new_parlor)
 
     """Iteration"""
+    print("\nIteration:")
     for device in new_parlor:
         print(device)
 
     """Length"""
+    print("\nRoom's length:")
     print(len(new_parlor))
 
     """Index access for rooms"""
+    print("\nIndex access for rooms:")
     print(new_parlor[0])
     print(new_parlor[2:])
 
     """Creating a 'smart thermostat' (thermostat + sensor)"""
+    print("\nCreating a 'smart thermostat' (thermostat + sensor)")
     smart_thermostat1 = SmartThermostat(
         "SmartThermostat",
         "УмныйТермостат1",
         "temperature=12,target=14,value=15"
     )
+    print(smart_thermostat1)
     smart_thermostat2 = SmartThermostat(
         "SmartThermostat",
         "УмныйТермостат2",
         "temperature=12,target=14,value=15"
     )
+    print(smart_thermostat2)
+    """Smart thermostat comparison:"""
+    print("\nSmart thermostat comparison:")
     print(smart_thermostat1 == smart_thermostat2)
+    print("\nChanging parameters of smart thermostat:")
     print(smart_thermostat1)
     smart_thermostat1.change_params(temperature=13, target=15, value=89)
     print(smart_thermostat1)
