@@ -109,9 +109,11 @@ if __name__ == "__main__":
         "temperature=12,target=14,value=15"
     )
     print(smart_thermostat2)
+
     """Smart thermostat comparison:"""
     print("\nSmart thermostat comparison:")
     print(smart_thermostat1 == smart_thermostat2)
+
     print("\nChanging parameters of smart thermostat:")
     print(smart_thermostat1)
     smart_thermostat1.change_params(temperature=13, target=15, value=89)
