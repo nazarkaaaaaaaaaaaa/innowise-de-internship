@@ -2,6 +2,14 @@ from smart_home.devices import Device, PowerConsumerMixin
 from typing import Iterator
 
 class RoomPrintableMixin:
+    """
+    SOLID:
+    - SRP: Single responsibility - manages collection of devices in a room.
+    - OCP: Open for extension - can be extended with new room types or functionalities.
+    - LSP: Liskov Substitution - can be used wherever a room-like container is expected.
+    - ISP: Interface Segregation - provides clean room management interface.
+    - DIP: High-level modules depend on Device abstraction, not concrete implementations.
+    """
     def __str__(self) -> str:
         return "\n".join(f"{self.room_name}|{device}" for device in self.devices)
 

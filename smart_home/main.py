@@ -87,7 +87,8 @@ if __name__ == "__main__":
     """Device comparison:"""
     print("\nDevice comparison:")
     print(parlor[2] == kitchen[1])
-    bedroom[0].params = 22, 24
+    bedroom.get_by_name("Термостат2").temperature = 22
+    bedroom.get_by_name("Термостат2").target = 24
     print(bedroom[0] == parlor[1])
 
     """Adding a room with elements:"""

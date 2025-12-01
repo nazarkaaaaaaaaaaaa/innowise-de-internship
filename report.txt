@@ -3,7 +3,7 @@
 Гостиная|Sensor|Датчик1|value=45
 Кухня|Light|Лампа2|power=50,state=on
 Кухня|Sensor|Датчик2|value=30
-Спальня|Thermostat|Термостат2|temperature=45,target=54
+Спальня|Thermostat|Термостат2|temperature=22,target=24
 Спальня|Light|Лампа3|power=30,state=off
 Гостиная-Кухня|Light|Лампа1|power=60,state=off
 Гостиная-Кухня|Thermostat|Термостат1|temperature=22,target=24

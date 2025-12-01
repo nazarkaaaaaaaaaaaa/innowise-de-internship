@@ -9,6 +9,14 @@ class DevicePrintableMixin:
         return f"{self.__class__.__name__}(type={self._device_type}, name={self._device_name}, params={self._params})"
 
 class Device(DevicePrintableMixin, ABC):
+    """
+    SOLID:
+    - SRP: Single responsibility - defines the core device interface and properties.
+    - OCP: Open for extension - allows creating new device types through inheritance.
+    - LSP: Liskov Substitution - ensures all subclasses maintain device interface compatibility.
+    - ISP: Interface Segregation - provides minimal essential interface for devices.
+    - DIP: Dependency Inversion - high-level modules depend on this abstraction.
+    """
     @abstractmethod
     def __init__(self, device_type: str, device_name: str, params: dict):
         self._device_type = device_type
@@ -19,9 +27,9 @@ class Device(DevicePrintableMixin, ABC):
     def __eq__(self, other) -> bool:
         pass
 
-    @abstractmethod
-    def serialize_params(self) -> str:
-        pass
+    @property
+    def serialize_params(self) -> dict:
+        return self._params
 
     @property
     def device_type(self) -> str:
@@ -40,6 +48,12 @@ class PowerConsumerMixin:
 
 
 class Light(Device, PowerConsumerMixin):
+    """
+    SOLID:
+    - LSP: Liskov Substitution - can be substituted for Device and PowerConsumerMixin.
+    - SRP: Single responsibility - manages light-specific state and behavior.
+    - OCP: Open for extension - can be extended without modifying this class.
+    """
     def __init__(self, device_type: str, device_name: str, params: dict):
         params_copy = params.copy()
         params_copy.setdefault("power", 0)
@@ -72,12 +86,15 @@ class Light(Device, PowerConsumerMixin):
 
     def turn_on(self):
         self._params["state"] = "on"
-        
-    def serialize_params(self) -> dict:
-        return self._params
 
 
 class Thermostat(Device):
+    """
+    SOLID:
+    - SRP: Single responsibility - manages temperature settings only.
+    - LSP: Liskov Substitution - can be substituted for Device.
+    - OCP: Open for extension - can be inherited by SmartThermostat.
+    """
     def __init__(self, device_type: str, device_name: str, params: dict):
         params_copy = params.copy()
         params_copy.setdefault("temperature", -30)
@@ -109,12 +126,15 @@ class Thermostat(Device):
     @target.setter
     def target(self, target: int):
         self._params["target"] = max(-30, target)
-    
-    def serialize_params(self) -> dict:
-        return self._params
 
 
 class Sensor(Device):
+    """
+    SOLID:
+    - SRP: Single responsibility - handles sensor value management only.
+    - ISP: Interface Segregation - provides clean sensor-specific interface.
+    - LSP: Liskov Substitution - can be substituted for Device.
+    """
     def __init__(self, device_type: str, device_name: str, params: dict):
         params_copy = params.copy()
         params_copy.setdefault("value", 0)
@@ -135,12 +155,16 @@ class Sensor(Device):
     @value.setter
     def value(self, value: int):
         self._params["value"] = max(0, value)
-        
-    def serialize_params(self) -> dict:
-        return self._params
 
 
 class SmartThermostat(Thermostat, Sensor):
+    """
+    SOLID:
+    - LSP: Liskov Substitution - can be substituted for both Thermostat and Sensor.
+    - SRP: Single responsibility - combines temperature control and sensing.
+    - ISP: Interface Segregation - inherits only necessary interfaces from parents.
+    - OCP: Open for extension - can be further extended without modification.
+    """
     def __init__(self, device_type: str, device_name: str, params: dict):
         super().__init__(device_type, device_name, params)
 
@@ -152,18 +176,18 @@ class SmartThermostat(Thermostat, Sensor):
             and self.target == other.target
             and self.value == other.value
         )
-    
-    def serialize_params(self) -> dict:
-        return self._params
 
 
 class SmartLight(Light, Thermostat, PowerConsumerMixin):
+    """
+    SOLID:
+    - LSP: Liskov Substitution - can be substituted for Light, Thermostat and PowerConsumerMixin.
+    - SRP: Single responsibility - combines lighting, temperature control and power monitoring.
+    - ISP: Interface Segregation - inherits multiple focused interfaces.
+    - OCP: Open for extension - can be extended with additional functionality.
+    """
     def __init__(self, device_type: str, device_name: str, params: dict):
         super().__init__(device_type, device_name, params)
-
-    @property
-    def power(self) -> int:
-        return self._params.get("power") if self._params.get("state") == "on" else 0
 
     def __eq__(self, other: "SmartLight"):
         if not isinstance(other, SmartLight):
@@ -174,6 +198,3 @@ class SmartLight(Light, Thermostat, PowerConsumerMixin):
             and self.power == other.power
             and self.state == other.state
         )
-
-    def serialize_params(self) -> dict:
-        return self._params
