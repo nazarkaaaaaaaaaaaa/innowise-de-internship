@@ -1,0 +1,13 @@
+Гостиная|Light|Лампа1|power=60,state=off
+Гостиная|Thermostat|Термостат1|temperature=22,target=24
+Гостиная|Sensor|Датчик1|value=45
+Кухня|Light|Лампа2|power=50,state=on
+Кухня|Sensor|Датчик2|value=30
+Спальня|Thermostat|Термостат2|temperature=45,target=54
+Спальня|Light|Лампа3|power=30,state=off
+Гостиная-Кухня|Light|Лампа1|power=60,state=off
+Гостиная-Кухня|Thermostat|Термостат1|temperature=22,target=24
+Гостиная-Кухня|Sensor|Датчик1|value=45
+Гостиная-Кухня|Light|Лампа2|power=50,state=on
+Гостиная-Кухня|Sensor|Датчик2|value=30
+Гостиная-Кухня|SmartThermostat|УмныйТермостат1|temperature=13,target=15,value=89

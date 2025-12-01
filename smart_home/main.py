@@ -1,17 +1,5 @@
-from smart_home import Device, Light, Room, Sensor, SmartThermostat, Thermostat
-from typing import Type
-
-"""Methods for reading data from a file and creating a device 
-(light, thermostat, sensor)"""
-def read_file(filename) -> list[list[str]]:
-    rooms_values = []
-    try:
-        with open(filename, "r", encoding="utf-8") as file:
-            for room_values in file.readlines():
-                rooms_values.append(list(room_values.strip().split("|", maxsplit=3)))
-    except FileNotFoundError:
-        print(f"{filename} not found")
-    return rooms_values
+from smart_home import Device, Light, Room, Sensor, SmartThermostat, SmartLight, Thermostat
+from typing import Any, Type
 
 DEVICE_CLASSES: dict[str, Type[Device]] = {
     "Light": Light,
@@ -20,34 +8,60 @@ DEVICE_CLASSES: dict[str, Type[Device]] = {
     "SmartThermostat": SmartThermostat
 }
 
-def create_device_from_file(device_type, name, params) -> Device:
-    return DEVICE_CLASSES[device_type](device_type, name, params)
+def create_device(device_type: str, device_name: str, params: dict) -> Device:
+    device_class = DEVICE_CLASSES[device_type]
+    return device_class(device_type, device_name, params)
+
+def cast(value):
+    if value.isdigit():
+        return int(value)
+    try:
+        return float(value)
+    except ValueError:
+        pass
+    return value
+
+def read_file(filepath: str) -> dict[str, Any]:
+    loaded_rooms = {}
+    try:
+        with open(filepath, "r", encoding="utf-8") as file:
+            for line in file:
+                line = line.strip()
+                room_name, dev_type, dev_name, params_str = line.split("|")
+                params = {}
+                for pair in params_str.split(","):
+                    key, value = pair.split("=")
+                    params[key] = cast(value.strip())
+                if room_name not in loaded_rooms:
+                    loaded_rooms[room_name] = Room(room_name)
+                room_device = create_device(dev_type, dev_name, params)
+                loaded_rooms[room_name].add_device(room_device)
+    except FileNotFoundError:
+        print(f"File {filepath} not found")
+    return loaded_rooms
+
+def write_rooms_to_file(rooms: dict[str, Room], filepath: str):
+    with open(filepath, "w", encoding="utf-8") as file:
+        for room in rooms.values():
+            file.write(str(room) + "\n")
 
 if __name__ == "__main__":
     """Creating rooms and devices from a file and printing them"""
-    parlor = Room("Гостиная")
-    kitchen = Room("Кухня")
-    bedroom = Room("Спальня")
-    for room in read_file("config.txt"):
-        if room[0] == parlor.get_room_name():
-            parlor.add_device(create_device_from_file(room[1], room[2], room[3]))
-        elif room[0] == kitchen.get_room_name():
-            kitchen.add_device(create_device_from_file(room[1], room[2], room[3]))
-        elif room[0] == bedroom.get_room_name():
-            bedroom.add_device(create_device_from_file(room[1], room[2], room[3]))
-    parlor.add_device(Light("Light", "Лампа4", "power=100,state=off"))
-    print("Rooms output:")
-    print(parlor)
-    print(kitchen)
-    print(bedroom)
+    rooms = read_file("config.txt")
+    for room in rooms.values():
+        print(room)
+    parlor = rooms.get("Гостиная")
+    kitchen = rooms.get("Кухня")
+    bedroom = rooms.get("Спальня")
 
     """Changing parameters of different devices:
-        In the living room sensor: 25 -> 45
-        In the kitchen light: 40 -> 45, on -> off
+        In the parlor sensor: 25 -> 45
+        In the kitchen light: 40 -> 50
         In the bedroom thermostat: 20 -> 45, 22 -> 54"""
-    parlor[2].change_params(value=45)
-    kitchen[0].change_params(power=45, state="off")
-    bedroom[0].change_params(temperature=45, target=54)
+    parlor.get_by_name("Датчик1").value = 45
+    kitchen.get_by_name("Лампа2").power = 50
+    bedroom.get_by_name("Термостат2").temperature = 45
+    bedroom.get_by_name("Термостат2").target = 54
     print("\nChanging parameters of different devices:")
     print(parlor)
     print(kitchen)
@@ -73,48 +87,63 @@ if __name__ == "__main__":
     """Device comparison:"""
     print("\nDevice comparison:")
     print(parlor[2] == kitchen[1])
-    bedroom[0].change_params(temperature=22, target=24)
+    bedroom[0].params = 22, 24
     print(bedroom[0] == parlor[1])
 
     """Adding a room with elements:"""
     print("\nAdding a room with elements:")
-    new_parlor = parlor + kitchen[0]
-    print(new_parlor)
+    parlor_kitchen = (parlor + kitchen).rename("Гостиная-Кухня")
+    print(parlor_kitchen)
 
     """Iteration"""
     print("\nIteration:")
-    for device in new_parlor:
+    for device in parlor_kitchen:
         print(device)
 
     """Length"""
     print("\nRoom's length:")
-    print(len(new_parlor))
+    print(len(parlor_kitchen))
 
     """Index access for rooms"""
     print("\nIndex access for rooms:")
-    print(new_parlor[0])
-    print(new_parlor[2:])
+    print(parlor_kitchen[0])
+    print(parlor_kitchen[2:])
+
+    """Sorting"""
+    print("\nSorting:")
+    rooms["Гостиная-Кухня"] = parlor_kitchen
+    sorted_rooms = sorted(rooms.values())
+    for room in sorted_rooms:
+        print(room)
 
     """Creating a 'smart thermostat' (thermostat + sensor)"""
     print("\nCreating a 'smart thermostat' (thermostat + sensor)")
-    smart_thermostat1 = SmartThermostat(
-        "SmartThermostat",
-        "УмныйТермостат1",
-        "temperature=12,target=14,value=15"
-    )
+    smart_thermostat1 = SmartThermostat("SmartThermostat","УмныйТермостат1",{"temperature": 14, "target": 15, "value": 12})
     print(smart_thermostat1)
-    smart_thermostat2 = SmartThermostat(
-        "SmartThermostat",
-        "УмныйТермостат2",
-        "temperature=12,target=14,value=15"
-    )
+    smart_thermostat2 = SmartThermostat("SmartThermostat","УмныйТермостат2", {"temperature": 14, "target": 15, "value": 12})
     print(smart_thermostat2)
+
+    """MRO"""
+    print("\nMRO:")
+    for cls in SmartThermostat.mro():
+        print(cls)
 
     """Smart thermostat comparison:"""
     print("\nSmart thermostat comparison:")
     print(smart_thermostat1 == smart_thermostat2)
 
+    """Changing parameters of smart thermostat:"""
     print("\nChanging parameters of smart thermostat:")
     print(smart_thermostat1)
-    smart_thermostat1.change_params(temperature=13, target=15, value=89)
+    smart_thermostat1.temperature = 13
+    smart_thermostat1.target = 15
+    smart_thermostat1.value = 89
     print(smart_thermostat1)
+
+    """Creating a 'smart light'"""
+    print("\nCreating a 'smart light'")
+    smart_light1 = SmartLight("SmartLight", "УмнаяЛампа1", {"temperature": 14, "target": 15, "power": 12, "state": "on"})
+    print(smart_light1.power)
+
+    parlor_kitchen.add_device(smart_thermostat1)
+    write_rooms_to_file(rooms, "report.txt")

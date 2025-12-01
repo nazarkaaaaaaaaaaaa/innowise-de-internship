@@ -1,44 +1,24 @@
-from smart_home.devices import Light, Device
+from smart_home.devices import Device, PowerConsumerMixin
 from typing import Iterator
 
+class RoomPrintableMixin:
+    def __str__(self) -> str:
+        return "\n".join(f"{self.room_name}|{device}" for device in self.devices)
 
-class PowerCalculationMixin:
-    devices: list[Device]
-
-    def get_total_power(self):
-        return sum(device.get_power() for device in self.devices if isinstance(device, Light))
+    def __repr__(self) -> str:
+        return "\n".join(f"Room name={self.room_name}|{repr(device)}" for device in self.devices)
 
 
-class Room(PowerCalculationMixin):
-    """
-    SOLID Compliance:
-        - S (Single Responsibility):
-          Room stores devices and provides high-level operations on them.
-          Power calculation is delegated to PowerCalculationMixin instead of this class.
-
-        - O (Open/Closed):
-          New behaviors (e.g., aggregation logic, filtering, metrics) can be added via mixins
-          or composition without modifying the class itself.
-
-        - L (Liskov Substitution):
-          Works with any object implementing the Device interface; subclasses of Device
-          can be freely substituted.
-
-        - I (Interface Segregation):
-          Room depends only on the minimal Device interface (e.g., __str__, get_power),
-          not on concrete implementations like Light or Thermostat.
-
-        - D (Dependency Inversion):
-          Room relies on the abstract Device type rather than concrete device classes,
-          allowing extensibility and loose coupling.
-    """
+class Room(RoomPrintableMixin):
     def __init__(self, room_name: str):
-        self.__room_name = room_name
+        self._room_name = room_name
         self.devices = []
 
-    def __add__(self, other: Device) -> "Room":
-        new_room = Room(self.__room_name)
-        new_room.devices = self.devices + [other]
+    def __add__(self, other: "Room") -> "Room":
+        if not isinstance(other, Room):
+            raise TypeError(f"Cannot add {type(self)} with {type(other)}")
+        new_room = Room("_combined")
+        new_room.devices = self.devices + other.devices
         return new_room
 
     def __getitem__(self, item: int|slice) -> Device:
@@ -50,16 +30,18 @@ class Room(PowerCalculationMixin):
     def __iter__(self) -> Iterator[Device]:
         return iter(self.devices)
 
-    def __str__(self) -> str:
-        room_str = "\n    ".join(str(device) for device in self.devices)
-        return f"{self.__room_name}: {room_str}"
+    def __lt__(self, other: "Room") -> bool:
+        if not isinstance(other, Room):
+            raise TypeError(f"Cannot compare {type(self)} with {type(other)}")
+        return self._room_name < other._room_name
 
-    def __repr__(self) -> str:
-        room_str = "\n    ".join(repr(device) for device in self.devices)
-        return f"Room's name - {self.__room_name}: {room_str}"
+    @property
+    def room_name(self) -> str:
+        return self._room_name
 
-    def get_room_name(self) -> str:
-        return self.__room_name
+    def rename(self, new_name: str) -> "Room":
+        self._room_name = new_name
+        return self
 
     def add_device(self, device: Device) -> list[Device]:
         self.devices.append(device)
@@ -68,3 +50,16 @@ class Room(PowerCalculationMixin):
     def remove_device(self, device: Device) -> list[Device]:
         self.devices.remove(device)
         return self.devices
+
+    def get_total_power(self) -> int:
+        total = 0
+        for device in self.devices:
+            if isinstance(device, PowerConsumerMixin):
+                total += device.power
+        return total
+
+    def get_by_name(self, name: str) -> Device:
+        for device in self.devices:
+            if device.device_name == name:
+                return device
+        raise KeyError(f"Device with name '{name}' not found in room '{self._room_name}'")
