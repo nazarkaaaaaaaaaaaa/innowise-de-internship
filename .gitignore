@@ -210,3 +210,4 @@ __marimo__/
 *.iml
 #Файл для проверки записи в файл
 result.txt
+config.txt
