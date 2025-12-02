@@ -17,7 +17,6 @@ class Device(DevicePrintableMixin, ABC):
     - ISP: Interface Segregation - provides minimal essential interface for devices.
     - DIP: Dependency Inversion - high-level modules depend on this abstraction.
     """
-    @abstractmethod
     def __init__(self, device_type: str, device_name: str, params: dict):
         self._device_type = device_type
         self._device_name = device_name

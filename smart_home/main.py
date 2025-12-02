@@ -5,11 +5,15 @@ DEVICE_CLASSES: dict[str, Type[Device]] = {
     "Light": Light,
     "Thermostat": Thermostat,
     "Sensor": Sensor,
-    "SmartThermostat": SmartThermostat
+    "SmartThermostat": SmartThermostat,
+    "SmartLight": SmartLight
 }
 
 def create_device(device_type: str, device_name: str, params: dict) -> Device:
-    device_class = DEVICE_CLASSES[device_type]
+    try:
+        device_class = DEVICE_CLASSES[device_type]
+    except KeyError:
+        raise ValueError(f"Unknown device type: {device_type}")
     return device_class(device_type, device_name, params)
 
 def cast(value):
