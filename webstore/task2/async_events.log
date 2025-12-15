@@ -1,0 +1,2 @@
+2025-12-15 12:36:47,556 - INFO - Final count {'view': 61775, 'add_to_cart': 60996, 'purchase': 61260}
+2025-12-15 12:36:48,061 - INFO - Garbage collection complete: objects deleted = 33, tracked objects remaining = 14160

@@ -59,6 +59,7 @@ async def main():
     collected = gc.collect()
     tracked = len(gc.get_objects())
     logging.info(f"Garbage collection complete: objects deleted = {collected}, tracked objects remaining = {tracked}")
+    print(f"Garbage collection complete: objects deleted = {collected}, tracked objects remaining = {tracked}")
 
 if __name__ == '__main__':
     asyncio.run(main())

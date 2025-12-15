@@ -1,6 +1,7 @@
 import logging
 import re
 from typing import Any
+import gc
 
 phone_pattern = r"phone=\+?\d\-?\s?\(?\d{1,3}\s?\)?\-?\d{3}\s?\-?\d{2}\s?\-?\d{2}"
 email_pattern = r"email=[A-Za-z0-9]+(\.?-?\+?[A-Za-z0-9]+)*@[a-zA-Z0-9]+(\.[a-z]{2,6})?(\.[a-z]{2,3})+"
@@ -33,9 +34,9 @@ def write_data(filepath, lines):
             result = find_and_replace(line)
             file.write(result.get("line"))
             logging.info(f"Line {index + 1}: "
-                f"Phones: {result.get("phone_count")} replaces, "
-                f"Emails: {result.get("email_count")} replaces, "
-                f"Tokens: {result.get("token_count")} replaces")
+                f"Phones: {result.get('phone_count')} replaces, "
+                f"Emails: {result.get('email_count')} replaces, "
+                f"Tokens: {result.get('token_count')} replaces")
             if (result.get("phone_count") +
                 result.get("email_count")) + result.get("token_count") > 4:
                 logging.warning(f"Line {index + 1} has more than 4 replaces")
@@ -50,6 +51,8 @@ logging.basicConfig(
 if __name__ == "__main__":
     lines = read_data("user_events1.txt")
     write_data("user_events.txt", lines)
+    collected = gc.collect()
+    print(f"Garbage collector ran, {collected} unreachable objects found and deleted.")
 
 def test_positive_basic_replacement():
     """

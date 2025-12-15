@@ -2,9 +2,8 @@ import gc
 import logging
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import Generator
 
-def read_data(filepath: str) -> Generator[list[str]]:
+def read_data(filepath: str) -> list[str]:
     try:
         with open(filepath, "r", encoding="utf-8") as file:
             block = []
