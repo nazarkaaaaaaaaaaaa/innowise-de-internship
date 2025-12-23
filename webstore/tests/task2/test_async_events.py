@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch
 import asyncio
-from async_events import create, worker
+from webstore.task2.async_events import create, worker
 
 
 class TestSimpleAsyncUnits(unittest.IsolatedAsyncioTestCase):
