@@ -26,8 +26,9 @@ def find_products_and_status_200(block) -> int:
     return counter
 
 def run_processes():
+    blocks = list(read_data("access_logs.txt"))
     with ProcessPoolExecutor(max_workers=5) as executor:
-        results = list(executor.map(find_products_and_status_200, read_data("access_logs.txt")))
+        results = executor.map(find_products_and_status_200, blocks)
         return sum(results)
 
 logging.basicConfig(
